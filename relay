@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+#
+# A hacky script to control USB HID relay https://www.amazon.com/gp/product/B07CFQMDJ3
+#
+# by Aaron Kondziela
+# License: cc-by https://creativecommons.org/licenses/by/4.0/
+#
+# Uses the tool found here: https://github.com/todbot/hidapitester
+#
+
+if [[ ! $1 && ! $2 ]] ; then
+	echo 'Usage: '$(basename $0)' <all|1|2> <on|off>'
+	exit 1
+fi
+
+RELAYNUM=$1
+
+if [[ $1 == "all" ]] ; then
+	if [[ $2 == "on" ]] ; then
+		# turn all on
+		RELAYCMD="0xFE"
+	elif [[ $2 == "off" ]] ; then
+		# turn all off
+		RELAYCMD="0xFC"
+	fi
+	hidapitester -q --vidpid 16c0/05df --usage 0001 --open --send-output ${RELAYCMD}
+else
+	if [[ $2 == "on" ]] ; then
+		# turn on
+		RELAYCMD="0xFF"
+	elif [[ $2 == "off" ]] ; then
+		# turn off
+		RELAYCMD="0xFD"
+	fi
+	hidapitester -q --vidpid 16c0/05df --usage 0001 --open --send-output 0x0,${RELAYCMD},${RELAYNUM} -l 3
+fi
+
